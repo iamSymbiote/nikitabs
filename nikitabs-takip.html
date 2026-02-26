@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Nikitabs Takip</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+  :root {
+    --bg: #0f0f13;
+    --surface: #1a1a22;
+    --surface2: #23232e;
+    --border: #2e2e3e;
+    --accent: #7c6af7;
+    --accent2: #f7a26a;
+    --green: #5ecfa0;
+    --red: #f76a6a;
+    --text: #e8e8f0;
+    --muted: #7a7a95;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    padding-bottom: 40px;
+  }
+
+  header {
+    padding: 28px 20px 20px;
+    text-align: center;
+    border-bottom: 1px solid var(--border);
+    background: linear-gradient(180deg, #16161f 0%, var(--bg) 100%);
+  }
+
+  header h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 26px;
+    letter-spacing: 0.5px;
+    color: var(--text);
+  }
+
+  header p {
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+
+  .progress-bar-wrap {
+    margin: 16px 20px 0;
+    height: 6px;
+    background: var(--border);
+    border-radius: 99px;
+    overflow: hidden;
+  }
+
+  .progress-bar-inner {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    border-radius: 99px;
+    transition: width 0.5s ease;
+  }
+
+  .day-tabs {
+    display: flex;
+    gap: 6px;
+    padding: 16px 20px 8px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .day-tabs::-webkit-scrollbar { display: none; }
+
+  .day-tab {
+    flex-shrink: 0;
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    border: 1.5px solid var(--border);
+    background: var(--surface);
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    transition: all 0.2s;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .day-tab.active {
+    border-color: var(--accent);
+    color: var(--text);
+    background: #1e1b33;
+  }
+
+  .day-tab.completed {
+    background: #1a2e24;
+    border-color: var(--green);
+    color: var(--green);
+  }
+
+  .day-tab.partial {
+    border-color: var(--accent2);
+    color: var(--accent2);
+  }
+
+  .day-tab .dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: currentColor;
+    opacity: 0.7;
+  }
+
+  .card {
+    margin: 12px 20px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    overflow: hidden;
+  }
+
+  .card-header {
+    padding: 16px 18px 12px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .card-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .day-label {
+    font-family: 'DM Serif Display', serif;
+    font-size: 20px;
+  }
+
+  .phase-badge {
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 99px;
+    background: #251e45;
+    color: var(--accent);
+    font-weight: 500;
+  }
+
+  .doses-grid {
+    padding: 14px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .dose-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .dose-btn {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    border: 1.5px solid var(--border);
+    background: var(--surface2);
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+    -webkit-tap-highlight-color: transparent;
+    flex-shrink: 0;
+  }
+
+  .dose-btn.taken {
+    background: #1a2e24;
+    border-color: var(--green);
+    color: var(--green);
+    font-size: 18px;
+  }
+
+  .dose-info {
+    flex: 1;
+  }
+
+  .dose-time {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .dose-label {
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  .dose-time-input {
+    background: var(--surface2);
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    font-size: 14px;
+    font-family: 'DM Sans', sans-serif;
+    padding: 6px 10px;
+    width: 90px;
+    text-align: center;
+  }
+  .dose-time-input:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+
+  .smoke-card {
+    margin: 0 20px 12px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 16px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .smoke-label {
+    font-size: 14px;
+    font-weight: 500;
+  }
+
+  .smoke-label span {
+    display: block;
+    font-size: 12px;
+    color: var(--muted);
+    font-weight: 400;
+    margin-top: 2px;
+  }
+
+  .smoke-counter {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .smoke-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    border: 1.5px solid var(--border);
+    background: var(--surface2);
+    color: var(--text);
+    font-size: 20px;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .smoke-count {
+    font-size: 22px;
+    font-weight: 700;
+    min-width: 32px;
+    text-align: center;
+    font-family: 'DM Serif Display', serif;
+  }
+
+  .stats-row {
+    display: flex;
+    gap: 10px;
+    margin: 0 20px 12px;
+  }
+
+  .stat-box {
+    flex: 1;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 14px 12px;
+    text-align: center;
+  }
+
+  .stat-value {
+    font-family: 'DM Serif Display', serif;
+    font-size: 24px;
+    color: var(--text);
+  }
+
+  .stat-label {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+
+  .note-card {
+    margin: 0 20px 12px;
+    background: #1a1a22;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 14px 16px;
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  .note-card strong {
+    color: var(--accent2);
+  }
+
+  .quit-banner {
+    margin: 0 20px 12px;
+    background: linear-gradient(135deg, #1a2e24, #1a2e2e);
+    border: 1px solid var(--green);
+    border-radius: 14px;
+    padding: 14px 16px;
+    font-size: 14px;
+    color: var(--green);
+    font-weight: 500;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Nikitabs Takip</h1>
+  <p id="headerSub">Burak Güvenç — 27 Şubat 2025 başlangıç</p>
+  <div class="progress-bar-wrap">
+    <div class="progress-bar-inner" id="progressBar" style="width:0%"></div>
+  </div>
+</header>
+
+<div style="height:12px"></div>
+
+<!-- Stats -->
+<div class="stats-row">
+  <div class="stat-box">
+    <div class="stat-value" id="statDay">1</div>
+    <div class="stat-label">Aktif Gün</div>
+  </div>
+  <div class="stat-box">
+    <div class="stat-value" id="statDoses">0</div>
+    <div class="stat-label">Bugün Alınan Doz</div>
+  </div>
+  <div class="stat-box">
+    <div class="stat-value" id="statSmoke">0</div>
+    <div class="stat-label">Bugün Sigara</div>
+  </div>
+</div>
+
+<!-- Day tabs -->
+<div class="day-tabs" id="dayTabs"></div>
+
+<!-- Current day card -->
+<div class="card" id="dayCard">
+  <div class="card-header">
+    <div>
+      <div class="card-title">Doz Takibi</div>
+      <div class="day-label" id="dayCardLabel">1. Gün</div>
+    </div>
+    <div class="phase-badge" id="phaseBadge">Faz 1</div>
+  </div>
+  <div class="doses-grid" id="dosesGrid"></div>
+</div>
+
+<!-- Smoke counter -->
+<div class="smoke-card">
+  <div class="smoke-label">
+    Bugün içilen sigara
+    <span>5. günde sıfır olmalı</span>
+  </div>
+  <div class="smoke-counter">
+    <button class="smoke-btn" id="smokeMinus">−</button>
+    <div class="smoke-count" id="smokeCount">0</div>
+    <button class="smoke-btn" id="smokePlus">+</button>
+  </div>
+</div>
+
+<!-- Quit banner (day 5+) -->
+<div class="quit-banner" id="quitBanner" style="display:none">
+  🚭 Bugün sigarayı tamamen bırakman gerekiyor!
+</div>
+
+<!-- Note -->
+<div class="note-card" id="noteCard"></div>
+
+<script>
+const START_DATE = new Date('2025-02-27');
+START_DATE.setHours(0,0,0,0);
+
+const PHASES = [
+  { days: [1,3],  interval: 2,   totalDoses: 6, label: 'Faz 1 (1-3. Gün)' },
+  { days: [4,12], interval: 2.5, totalDoses: 5, label: 'Faz 2 (4-12. Gün)' },
+  { days: [13,16],interval: 3,   totalDoses: 4, label: 'Faz 3 (13-16. Gün)' },
+  { days: [17,20],interval: 5,   totalDoses: 3, label: 'Faz 4 (17-20. Gün)' },
+  { days: [21,25],interval: 7,   totalDoses: 2, label: 'Faz 5 (21-25. Gün)' },
+];
+
+const NOTES = {
+  1: 'İlk 3 günde her 2 saatte 1 tablet. Sabah 09:00\'da başla.',
+  4: '4-12. günler arası sigara içmeyi bırakmalısın (en geç 5. günde).',
+  5: '⚠️ Bugün sigarayı tamamen bırakman gerekiyor!',
+  13: 'Artık her 3 saatte bir tablet. İyi gidiyorsun!',
+  17: 'Her 5 saatte bir tablet. Sonuna yaklaştın!',
+  21: 'Son faz! Her 6-8 saatte 1 tablet.',
+  25: 'Son gün! Tebrikler, tedaviyi tamamladın 🎉'
+};
+
+function getPhase(day) {
+  return PHASES.find(p => day >= p.days[0] && day <= p.days[1]);
+}
+
+function getDoseSchedule(day, startHour = 9) {
+  const phase = getPhase(day);
+  if (!phase) return [];
+  const doses = [];
+  for (let i = 0; i < phase.totalDoses; i++) {
+    const totalMinutes = startHour * 60 + i * phase.interval * 60;
+    const h = Math.floor(totalMinutes / 60);
+    const m = totalMinutes % 60;
+    doses.push(`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`);
+  }
+  return doses;
+}
+
+function getTodayDay() {
+  const today = new Date();
+  today.setHours(0,0,0,0);
+  const diff = Math.floor((today - START_DATE) / 86400000) + 1;
+  return Math.max(1, Math.min(25, diff));
+}
+
+function loadData() {
+  try { return JSON.parse(localStorage.getItem('nikitabs_data') || '{}'); } catch { return {}; }
+}
+
+function saveData(data) {
+  localStorage.setItem('nikitabs_data', JSON.stringify(data));
+}
+
+let data = loadData();
+let selectedDay = getTodayDay();
+
+function getDayData(day) {
+  if (!data[day]) data[day] = { doses: {}, smoke: 0 };
+  return data[day];
+}
+
+function renderTabs() {
+  const container = document.getElementById('dayTabs');
+  container.innerHTML = '';
+  const todayDay = getTodayDay();
+  for (let d = 1; d <= 25; d++) {
+    const dd = getDayData(d);
+    const phase = getPhase(d);
+    const totalDoses = phase ? phase.totalDoses : 0;
+    const takenCount = Object.values(dd.doses).filter(Boolean).length;
+
+    const btn = document.createElement('button');
+    btn.className = 'day-tab';
+    btn.innerHTML = `<span>${d}</span><span class="dot"></span>`;
+
+    if (d === selectedDay) btn.classList.add('active');
+    else if (takenCount === totalDoses && totalDoses > 0) btn.classList.add('completed');
+    else if (takenCount > 0) btn.classList.add('partial');
+
+    btn.onclick = () => { selectedDay = d; render(); scrollToTab(d); };
+    container.appendChild(btn);
+  }
+  scrollToTab(selectedDay);
+}
+
+function scrollToTab(day) {
+  const tabs = document.querySelectorAll('.day-tab');
+  if (tabs[day-1]) tabs[day-1].scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+}
+
+function renderDayCard() {
+  const dd = getDayData(selectedDay);
+  const phase = getPhase(selectedDay);
+  document.getElementById('dayCardLabel').textContent = `${selectedDay}. Gün`;
+  document.getElementById('phaseBadge').textContent = phase ? phase.label : '';
+
+  const schedule = getDoseSchedule(selectedDay);
+  const grid = document.getElementById('dosesGrid');
+  grid.innerHTML = '';
+
+  schedule.forEach((time, i) => {
+    const key = `dose_${i}`;
+    const taken = !!dd.doses[key];
+
+    const row = document.createElement('div');
+    row.className = 'dose-row';
+
+    const btn = document.createElement('button');
+    btn.className = 'dose-btn' + (taken ? ' taken' : '');
+    btn.innerHTML = taken ? '✓' : `${i+1}`;
+    btn.onclick = () => {
+      dd.doses[key] = !dd.doses[key];
+      saveData(data);
+      render();
+    };
+
+    const info = document.createElement('div');
+    info.className = 'dose-info';
+    info.innerHTML = `<div class="dose-time">${time}</div><div class="dose-label">${i+1}. Doz${taken ? ' — Alındı' : ''}</div>`;
+
+    row.appendChild(btn);
+    row.appendChild(info);
+    grid.appendChild(row);
+  });
+}
+
+function renderSmoke() {
+  const dd = getDayData(selectedDay);
+  document.getElementById('smokeCount').textContent = dd.smoke || 0;
+  document.getElementById('statSmoke').textContent = getDayData(getTodayDay()).smoke || 0;
+
+  const quitBanner = document.getElementById('quitBanner');
+  quitBanner.style.display = selectedDay >= 5 ? 'block' : 'none';
+}
+
+function renderStats() {
+  const todayDay = getTodayDay();
+  const dd = getDayData(todayDay);
+  const phase = getPhase(todayDay);
+  const total = phase ? phase.totalDoses : 0;
+  const taken = Object.values(dd.doses).filter(Boolean).length;
+
+  document.getElementById('statDay').textContent = todayDay;
+  document.getElementById('statDoses').textContent = `${taken}/${total}`;
+  document.getElementById('progressBar').style.width = `${(todayDay / 25) * 100}%`;
+}
+
+function renderNote() {
+  const el = document.getElementById('noteCard');
+  let note = '';
+  for (const [d, n] of Object.entries(NOTES)) {
+    if (selectedDay >= parseInt(d)) note = n;
+  }
+  el.innerHTML = note ? `<strong>📋 Not:</strong> ${note}` : '';
+}
+
+function render() {
+  renderTabs();
+  renderDayCard();
+  renderSmoke();
+  renderStats();
+  renderNote();
+}
+
+document.getElementById('smokePlus').onclick = () => {
+  const dd = getDayData(selectedDay);
+  dd.smoke = (dd.smoke || 0) + 1;
+  saveData(data);
+  renderSmoke();
+};
+
+document.getElementById('smokeMinus').onclick = () => {
+  const dd = getDayData(selectedDay);
+  dd.smoke = Math.max(0, (dd.smoke || 0) - 1);
+  saveData(data);
+  renderSmoke();
+};
+
+render();
+</script>
+</body>
+</html>
